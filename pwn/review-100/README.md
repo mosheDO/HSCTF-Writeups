@@ -116,3 +116,5 @@ char buffer[32];
 Means that `valid` is placed on the stack *before* `buffer` is. Thus, by overwriting `buffer` with gets(), we can actually leak into `valid`'s data! In C, there are no booleans -- `0` means `false`, and anything that's not 0 means `true`. 
 
 Therefore, we can overwrite valid by entering more than 32 characters (maybe a bit more) for the title of the movie, which means that valid gets overwritten with a nonzero value, thus making our review "valid" and getting us the flag!
+
+[Source for stack overflow images located here! Also functions as good reading and introduction to buffer overflows.](https://en.wikipedia.org/wiki/Stack_buffer_overflow)
