@@ -92,7 +92,7 @@ Interesting! Apparently we can overwrite other memory locations because **gets()
 ## Why does this work?
 
 
-In C, when you declare variables, they're placed on the program's *call stack*. Essentially, the program will allocate its variables in a data structure called a "stack", which houses the frame pointer, **return address**, and **variables**.
+In C, when you declare variables, they're placed on the program's *call stack*. Essentially, the program will allocate its variables in a data structure called a "stack". Imagine placing your hand out in front of you, palm up. Pil some imaginary papers on your hand. At any given point, without moving your hand, you only have access to the topmost paper of the stack, given the fact that you can't flip through the papers on your hand. In a C program, the call stack houses the frame pointer, **return address**, and **arguments**.
 
 The stack initially looks like this.
 
@@ -113,8 +113,8 @@ int valid = 0;
 char buffer[32];
 ```
 
-Means that `valid` is placed on the stack *before* `buffer` is. Thus, by overwriting `buffer` with gets(), we can actually leak into `valid`'s data! In C, there are no booleans -- `0` means `false`, and anything that's not 0 means `true`. 
+Means that `valid` is placed on the stack *before* `buffer` is. Returning to the palm analogy, you place a paper representing `valid` onto your palm first, THEN `buffer`, resulting in `buffer` being "on top of" `valid`. Your input then starts from the top side of the topmost paper and penetrates downwards, overwriting other papers underneath it. Thus, by overwriting `buffer` with gets(), we can actually leak into `valid`'s data! In C, there are no booleans -- `0` means `false`, and anything that's not 0 means `true`. 
 
-Therefore, we can overwrite valid by entering more than 32 characters (maybe a bit more) for the title of the movie, which means that valid gets overwritten with a nonzero value, thus making our review "valid" and getting us the flag!
+Therefore, we can overwrite valid by entering more than 32 characters (in reality a bit more) for the title of the movie, which means that valid gets overwritten with a nonzero value, thus making our review "valid" and getting us the flag!
 
 [Source for stack overflow images located here! Also functions as good reading and introduction to buffer overflows.](https://en.wikipedia.org/wiki/Stack_buffer_overflow)
