@@ -44,7 +44,7 @@ This looks like the flag verification code with two branches, presumably to tell
 
 ![images/asm5.png](images/asm5.png)
 
-Seems that the constants got incorrectly disassembled, as there is our "wrong" and "Congrats" in their full glory. Let's rename that and see what `wrong` and `right` are doing:
+Seems that the constants got incorrectly disassembled, as there is our "wrong" and "Congrats" in their full hex-encoded glory. Let's rename that and see what `wrong` and `right` are doing:
 
 ![images/asm6.png](images/asm6.png)
 
