@@ -6,7 +6,7 @@ Here are writeups for my HSCTF 5 problems, fully annotated and explained with pi
 
 * [ASM (400 points)](re/asm-400/README.md)
 
-### Binary Exploitation
+### Binary Exploitation / Pwn
 
 * [Review (100 points): Intro to Buffer Overflow](pwn/review-100/README.md)
 * [Jumper (150 points): Intro to Stack Smashing](pwn/jumper-150/README.md)
