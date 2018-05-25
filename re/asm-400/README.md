@@ -61,3 +61,5 @@ Now, we can finally tackle the top portion of [xors and subis](asm10.png). After
 Turning this into a single string `666c61677b6733636b305f63306433355f6172335f7374316c6c5f757333647d` and decoding as hex yields the flag.
 
 ![images/sol.png](images/sol.png)
+
+Flag: `flag{g3ck0_c0d35_ar3_st1ll_us3d}`
