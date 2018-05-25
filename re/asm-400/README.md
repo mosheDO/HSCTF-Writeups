@@ -1,4 +1,4 @@
-# ASM Writeup (RE, 400 points)
+# ASM Writeup (Reverse Engineering, 400 points)
 
 We are greeted with a long string that seems to be simply gibberish. I notice immediately that there are equals signs at the end of the string, which signifies to me that this string is base64 encoded. A quick google for "equals sign at end of string" confirms this, so we base64 decode it to reveal...
 
@@ -54,7 +54,7 @@ Now, we're prepared to tackle the [third portion of the code](images/asm8.png). 
 
 ![images/asm9.png](images/asm9.png)
 
-Now, we can finally tackle the top portion of [xors and subis](asm10.png). After doing some really annoying math, we come up with these values:
+Now, we can finally tackle the top portion of [xors and subis](asm10.png). In general, the formula seems to be `input register XOR input SUBI input = output register`. After doing some really annoying math, we come up with these values:
 
 ![images/asm10.png](images/asm10.png)
 
@@ -62,4 +62,4 @@ Turning this into a single string `666c61677b6733636b305f63306433355f6172335f737
 
 ![images/sol.png](images/sol.png)
 
-Flag: `flag{g3ck0_c0d35_ar3_st1ll_us3d}`
+#### Flag: `flag{g3ck0_c0d35_ar3_st1ll_us3d}`
