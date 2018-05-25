@@ -10,7 +10,7 @@ Here are writeups for my HSCTF 5 problems, fully annotated and explained with pi
 
 * [Review (100 points)](pwn/review-100/README.md)
 * [Jumper (150 points)](pwn/jumper-150/README.md)
-* [Caesar (300 point)](pwn/caesar-300/README.md)
+* [Caesar (300 points)](pwn/caesar-300/README.md)
 * [Alarm (450 points)](pwn/alarm-450/README.md)
 
 ### Other
