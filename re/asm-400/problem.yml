@@ -1,0 +1,10 @@
+extra: string
+name: "ASM"
+alias: "ASM"
+author: "Spencer H"
+category: "reversal"
+description: "Keith sent me a file and told me he encoded it twice, once using \"special ASM\". He also mentioned that it was really \"wiird\", but maybe that was just a typo. Any idea what he's trying to tell me?<br />File: <a href='|froginablender.txt|'>froginablender.txt</a>. I hope you have a paper and pencil handy."
+points: 400
+grading: "flag"
+flag: "flag{g3ck0_c0d35_ar3_st1ll_us3d}"
+stage: HSCTF
