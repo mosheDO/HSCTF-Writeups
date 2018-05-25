@@ -12,7 +12,7 @@ It looks like hex, so let's try decoding it.
 
 ![images/asm0.png](images/asm0.png)
 
-I see "wrong" and "Correct", so we're making progress, but where do we go from here? Let's take another look at the problem. In the description, Keith says the string is encoded twice, once with "special ASM". We just deduced that Base64 was the first encryption, so this string must be encoded with "special ASM". What can we do from here? 
+I see "wrong" and "Congrats", so we're making progress, but where do we go from here? Let's take another look at the problem. In the description, Keith says the string is encoded twice, once with "special ASM". We just deduced that Base64 was the first encryption, so this string must be encoded with "special ASM". What can we do from here? 
 
 Let's google the quoted strings "special ASM" and "wiird".
 
