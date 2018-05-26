@@ -60,11 +60,11 @@ void give_flag(char* s) {
 
 Aha! There is a malformed printf call, allowing us to execute a format string attack. First, let's locate our input on the stack (the reasoning behind this will become apparent later).
 
-![term1.png](term1.png)
+![images/term1.png](images/term1.png)
 
 Here's proof that printf is leaking values from the stack :) We're specifically looking for values 0x41414141, 0x42424242, and so on because *that's what we put in as input* before leaking data. Near the end, we count that "41414141" is the 31st input on the stack. We can verify this by outputting only the 31st input on the stack with `%31$x`. **Note that '$' is a special character in a shell, so it must be escaped with a backslash '\\' every time it is used in a script!** As input, however, it is treated as raw text.
 
-![term2.png](term2.png)
+![images/term2.png](images/term2.png)
 
 Great! As we recall from the above articles, we can now write *anything we want* to address 0x41414141. Let's replace that with the GOT entry for a specific function...but which function? Some function has to be called after this malformed printf call to jump to give_flag, after all.
 
@@ -99,11 +99,11 @@ As it turns out, the only calls that happen after our input are *printf* and *ex
 
 We could also overwrite exit(), but the function I chose to overwrite was puts(). "What puts()?" you might ask. "I only see printf!"
 
-##### When printf is called with only a string as input (not a variable!), it gets optimized to puts().
+**When printf is called with only a string as input (not a variable!), it gets optimized to puts().**
 
 In fact, this harkens back to [HSCTF 2017's Never Say Goodbye :P](https://jakobdegen.gitbooks.io/hsctf-4-writeups/content/solutions/exploitation/400-never-say-goodbye.html) We can verify this by looking at the disassembly with `objdump -d caesar`:
 
-![term3.png](term3.png)
+![images/term3.png](images/term3.png)
 
 We are correct! The second printf() call gets optimized to puts() when run by the machine. Let's overwrite the GOT entry of puts() so that when puts() is called, instead of redirecting the program to puts() in libc, it'll redirect flow to give_flag. We can find the GOT entry location by running `objdump -R caesar | grep puts`.
 
@@ -132,14 +132,14 @@ Now, when we call puts() at the very end, we should instead redirect to give_fla
 
 Let's place a breakpoint with `b *0x0804885a`, right before our hijacked puts() call, and step through with `si` to see where we get taken.
 
-![term4.png](term4.png)
+![images/term4.png](images/term4.png)
 
 Success! We can see that once we step to puts@plt, we redirect to our "GOT entry", which actually points to give_flag! Let's try it out through netcat.
 
-![term5.png](term5.png)
+![images/term5.png](images/term5.png)
 
-Whoops! We forgot to provide input for the Caesar cipher itself. Append a "\n0\n" to the payload to simulate pressing enter with a shift of 0:
+Whoops! We forgot to provide input for the Caesar cipher itself. Append a "\n0\n" to the payload to simulate pressing enter after your input with a shift of 0:
 
-![sol.png](sol.png)
+![images/sol.png](images/sol.png)
 
 #### Flag: `flag{printered_lol}
