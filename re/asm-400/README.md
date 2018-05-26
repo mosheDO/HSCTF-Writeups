@@ -50,13 +50,13 @@ Seems that the constants got incorrectly disassembled, as there is our "wrong" a
 
 So, by looking into the PowerPC manual we find that `bl` is a branch with return (like `call` in x86) and `blrl` is the return (like `ret`). What's important to note here is that `blrl` places the instruction 4 bytes ahead in the link register, as can be seen in [this secondary manual](http://www.plantation-productions.com/Webster/www.writegreatcode.com/Vol2/wgc2_OB.pdf). The next instruction is the beginning of the .word layer! By running `mflr r13`, we get an arbitrary pointer to this array! We can confirm this by adding 0x14 to the position of r13 manually and seeing if it matches up with our "wrong" string. [It does!](images/asm7.png)
 
-Now, we're prepared to tackle the [third portion of the code](images/asm8.png). By analyzing and reading the manual, we see that we create the array pointer in r13 again, the load in various values from offsets to this pointer. By reading the manual, we find out that `rlwinm` rotates registers left by a certain amount, so this shifts the 4 lower bytes of a register into the top 4 bytes. Armed with this knowledge and some *painstaking* math, we get these values for r13-r20:
+Now, we're prepared to tackle the [third portion of the code](images/asm8.png). By analyzing and reading the manual, we see that we create the array pointer in r13 again, the load in various values from offsets to this pointer. By reading the manual, we find out that `rlwinm` rotates registers left by a certain amount, so this shifts the 4 lower bytes of a register into the top 4 bytes. Armed with this knowledge and some *incredibly annoying* math, we get these values for r13-r20:
 
 ![images/asm9.png](images/asm9.png)
 
-Now, we can finally tackle the top portion of [xors and subis](asm10.png). In general, the formula seems to be `input register XOR input SUBI input = output register`. After doing some really annoying math, we come up with these values:
+Now, we can finally tackle the top portion of [xors and subis](images/asm10.png). In general, the formula seems to be `input register XOR input SUBI input = output register`. After doing more math, we come up with these values:
 
-![images/asm10.png](images/asm10.png)
+![images/asm11.png](images/asm11.png)
 
 Turning this into a single string `666c61677b6733636b305f63306433355f6172335f7374316c6c5f757333647d` and decoding as hex yields the flag.
 
