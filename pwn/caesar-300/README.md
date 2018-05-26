@@ -95,7 +95,7 @@ As it turns out, the only calls that happen after our input are *printf* and *ex
 ```
     fscanf(flagFile, "%s", flag);
     printf("Here's a flag: %s\n", flag);
-    ```
+```
 
 We could also overwrite exit(), but the function I chose to overwrite was puts(). "What puts()?" you might ask. "I only see printf!"
 
@@ -128,7 +128,7 @@ Now, when we call puts() at the very end, we should instead redirect to give_fla
 ```
 0x0804885a <+575>:	push   $0x8048a6c
 0x0804885f <+580>:	call   0x80484c0 <puts@plt>
-   ```
+```
 
 Let's place a breakpoint with `b *0x0804885a`, right before our hijacked puts() call, and step through with `si` to see where we get taken.
 
