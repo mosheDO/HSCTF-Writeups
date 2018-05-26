@@ -3,8 +3,11 @@
 # import pwntools
 from pwn import *
 
-#open connection to remote servre
+#open connection to remote server
 r = remote("shell.hsctf.com", 10004)
+
+#or debug locally
+#r = process("./alarm", raw=false)
 
 #print out initial help stuff
 #print(r.recvuntil("$"))

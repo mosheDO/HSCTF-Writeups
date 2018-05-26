@@ -7,9 +7,9 @@ This writeup requires some background explanation. [Click here to skip that and 
 Our objective is to call `give_flag`. However, there are no buffer overflows to exploit here. Instead, we have to turn to a **GOT overwrite**. Now, I'll provide a quick primer here, as usual, but to really learn about the GOT/PLT table, I suggest visiting these links:
 
 
-	* [LiveOverflow GOT/PLT Table Explanation](https://www.youtube.com/watch?v=kUk5pw4w0h4)
-	* [Grant Curell - What is the GOT?](http://grantcurell.com/2015/09/21/what-is-the-symbol-table-and-what-is-the-global-offset-table/)
-	* [!HELPFUL! PicoCTF 2017 config_console writeup by _py](https://0x00sec.org/t/picoctf-write-up-bypassing-aslr-via-format-string-bug/1920)
+* [LiveOverflow GOT/PLT Table Explanation](https://www.youtube.com/watch?v=kUk5pw4w0h4)
+* [Grant Curell - What is the GOT?](http://grantcurell.com/2015/09/21/what-is-the-symbol-table-and-what-is-the-global-offset-table/)
+* [!HELPFUL! PicoCTF 2017 config_console writeup by \_py](https://0x00sec.org/t/picoctf-write-up-bypassing-aslr-via-format-string-bug/1920)
 
 Most programs are compiled *dynamically*, which means that the executable uses your machine's local libraries, instead of packing its own. Because referencing an absolute memory location is impossible when compiled dynamically, *offsets* to functions are stored in a Global Offset Table (GOT), where an absolute memory address can be calculated by finding (base) + (GOT_offset). 
 
@@ -21,10 +21,10 @@ Therefore, if we can overwrite the GOT entry for a function, when this function 
 
 The other half of this exploit is a **format string exploit**. Helpful links provided below:
 
-	* [StackOverflow Explanation](https://stackoverflow.com/questions/7459630/how-can-a-format-string-vulnerability-be-exploited)
-	* [Syracuse University Slides on Format String (diagrams!)](http://www.cis.syr.edu/~wedu/Teaching/cis643/LectureNotes_New/Format_String.pdf)
-	* [Code Arcana: Format String Exploits](http://codearcana.com/posts/2013/05/02/introduction-to-format-string-exploits.html)
-	* [!HELPFUL! PicoCTF 2017 config_console writeup by _py](https://0x00sec.org/t/picoctf-write-up-bypassing-aslr-via-format-string-bug/1920)
+* [StackOverflow Explanation](https://stackoverflow.com/questions/7459630/how-can-a-format-string-vulnerability-be-exploited)
+* [Syracuse University Slides on Format String (diagrams!)](http://www.cis.syr.edu/~wedu/Teaching/cis643/LectureNotes_New/Format_String.pdf)
+* [Code Arcana: Format String Exploits](http://codearcana.com/posts/2013/05/02/introduction-to-format-string-exploits.html)
+* [!HELPFUL! PicoCTF 2017 config_console writeup by \_py](https://0x00sec.org/t/picoctf-write-up-bypassing-aslr-via-format-string-bug/1920)
 
 Recall that arguments for method calls are placed on the stack right before they are called, e.g. `printf("%s", buf)` will cause `%s` and `buf` to be pushed onto the stack, then popped once `printf` is called. The important line in this exploit is the improper use of `printf(input)`. If an attacker were to input `%x %x %x %x %x` as a string, **a single** argument of `%x %x...` will be pushed onto the stack. However, printf is *dumb*, and when it gets the string `%x...`, it will think it has *five* inputs, and **pop five arguments off the stack, leaking arbitrary stack data**.
 

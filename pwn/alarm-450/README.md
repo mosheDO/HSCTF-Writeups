@@ -97,6 +97,38 @@ So now we know that what()'s address can be found by taking the 6th %lx address,
 
 Although you did not need to know the exploit in question, you were creating a **use-after-free** attack. 
 
-	* [LiveOverflow video](https://www.youtube.com/watch?v=ZHghwsTRyzQ)
+* [LiveOverflow video](https://www.youtube.com/watch?v=ZHghwsTRyzQ)
+* [SensePost UAF Blog Post](https://sensepost.com/blog/2017/linux-heap-exploitation-intro-series-used-and-abused-use-after-free/)
 
-When you allocate memory, say an alarm, 
+Essentially, when you free() a pointer's memory and *don't remove your pointer properly*, you end up with what's known as a "dangling pointer". Say an alarm points to location 0xffeeddcc. If we free() this alarm, the alarm pointer *still points to 0xffeeddcc*, and the data at 0xffeeddcc *still exists*, but **the memory is marked free by malloc**. Therefore, if you were to access something via the old alarm pointer, it could access arbitrary data. 
+
+Let's take a look at the source code of alarm for an example.
+
+![src1.png](src1.png)
+
+We can see that if an alarm_t and radio_t occupy the same location in memory, then when alarm_t is free()'d, the larger radio_t name buffer could overwrite the alarm_t ring() pointer.
+
+However, alarm_delete() calls were masked as a deterrent to the most obvious UAF attempts, like trying to ring an alarm right after deletion.
+
+![src2.png](src2.png)
+
+Right before free()ing the block of memory, the entire block is set to 0, thus "preventing" an immediate post-deletion UAF. However, one key part is missing: **the pointer to alarm is never set to NULL**.
+
+Therefore, even though it cannot access anything after deleting, \*alarm *still points to the block of memory allocated to it.* Thus, if alarm->ring() is called and the block of memory after it is filled with memory, it will still try to access ring(), casting that area to a function pointer.
+
+This will allow us to exploit the program. [See the solve script](./solve.py) for more detail on leaking the specific location in memory of what() after PIE/ASLR is enabled.
+
+At first, we will allocate an alarm, then delete it. This means that we have a zeroed out block of memory and an alarm pointer to this specific block of memory. After we delete the alarm, we allocate a radio. Since the block of memory is marked "free", malloc puts the radio struct *right where the old alarm struct was*.
+
+```
+radio_t
+[station][name - length 52                                    ][play][qbe]
+alarm_t
+[seconds][name - length 40                        ][ring][qbe]
+```
+
+We can see that our pointer to ring is located directly in our radio name! Therefore, by selectively creating a radio name, we can make alarm->ring() point to whatever function we want. Because we know above that the alarm pointer still exists, we can then ring this deleted alarm to jump to the function we want! We are "using" the alarm "after" we "free()"d the memory underneath. "Use-after-free".
+
+Unfortunately, I didn't have time to make the UAF less obvious, as fuzzing the binary could lead to code execution without having to figure out that radio_t was bigger than alarm_t. However, I still consider this a good beginner heap exploitation problem.
+
+I hope you enjoyed my writeups!
