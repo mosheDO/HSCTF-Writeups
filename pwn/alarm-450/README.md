@@ -8,11 +8,11 @@ We are given a binary and no source code this time! Let's try running it and tes
 
 Hmm...that "Alarm name: " looks rather suspicious at the bottom. As well, this program checks for format string attacks. Let's examine the objdump.
 
-Right away, we identify `00000000000011b0 <what>:` as our probable flag function. Also, we find that this binary was **compiled with ASLR**. Our previous binaries, like Caesar, Review, etc. all had function addresses beginning with 0x0804 and a fixed code location. Now, this strange code location signifies that our code has **ASLR, PIE, or both, randomizing libc locations and/or code locations**. We'll set that aside for now.  Let's look at something we can control, like create_alarm().
+Right away, we identify `00000000000011b0 <what>:` as our probable flag function. Also, we find that this binary was **compiled with ASLR / PIE**. Our previous binaries, like Caesar, Review, etc. all had function addresses beginning with 0x0804 and a fixed code location. Now, this strange code location signifies that our code has **ASLR, PIE, or both, randomizing libc locations and/or code locations**. We'll set that aside for now.  Let's look at something we can control, like create_alarm().
 
 ![images/term3.png](images/term3.png)
 
-We notice a whole bunch of strstr() at the beginning; this must be what checks for strings like "%x" and ends the program prematurely. As well, **we notice a malloc() call** of size 0x40. After that, it appears that some...pointers? named __ring and __qbe are allocated, as well as an array of size 0x28, or 40. Something is strncpy()'d in (presumably the name), and then the method ends.
+We notice a whole bunch of strstr() at the beginning; this must be what checks for strings like "%x" and ends the program prematurely. As well, **we notice a malloc() call** of size 0x40. After that, it appears that some...pointers? named \_\_ring and \_\_qbe are allocated, as well as an array of size 0x28, or 40. Something is strncpy()'d in (presumably the name), and then the method ends.
 
 Let's compare this to create_radio().
 
@@ -24,4 +24,79 @@ Recall that malloc fastbin lists are split into lists of size 0x8. Assuming that
 
 ![images/term5.png](images/term5.png)
 
-Success! Let's hop into GDB and figure out what's going on. Don't forget to run `set disable-randomization off` so GDB doesn't "helpfully" disable ASLR for you.
+Success! Let's hop into GDB and figure out what's going on. Note that I have [PEDA](https://github.com/longld/peda) installed; optional, but helpful.
+
+![images/term6.png](images/term6.png)
+
+![images/term7.png](images/term7.png)
+
+Let's narrow that down a bit. Through trial and error of various inputs, we find that a name of size 44 allows us to overflow RDX with whatever code we want. From here, we can jump to what().
+
+![images/term8.png](images/term8.png)
+
+We've overcome the first obstacle and have control of EIP! Remember though, this code will **move around** due to ASLR / PIE. Let's try running `set disable-randomization off` so GDB doesn't "helpfully" disable ASLR for us.
+
+```
+gdb-peda$ p what
+$3 = {<text variable, no debug info>} 0x55ebb16661b0 <what>
+gdb-peda$ disas main
+Dump of assembler code for function main:
+   0x000055ebb1665b10 <+0>:	sub    rsp,0x8
+   0x000055ebb1665b14 <+4>:	mov    rdi,QWORD PTR [rip+0x202595]        # 0x55ebb18680b0 <stdout@@GLIBC_2.2.5>
+   0x000055ebb1665b1b <+11>:	xor    esi,esi
+   0x000055ebb1665b1d <+13>:	call   0x55ebb1665a50 <setbuf@plt>
+   0x000055ebb1665b22 <+18>:	xor    eax,eax
+   0x000055ebb1665b24 <+20>:	call   0x55ebb16663c0 <loop>
+End of assembler dump.
+
+...
+
+gdb-peda$ p what
+$4 = {<text variable, no debug info>} 0x55843c8981b0 <what>
+gdb-peda$ disas main
+Dump of assembler code for function main:
+   0x000055843c897b10 <+0>:	sub    rsp,0x8
+   0x000055843c897b14 <+4>:	mov    rdi,QWORD PTR [rip+0x202595]        # 0x55843ca9a0b0 <stdout@@GLIBC_2.2.5>
+   0x000055843c897b1b <+11>:	xor    esi,esi
+   0x000055843c897b1d <+13>:	call   0x55843c897a50 <setbuf@plt>
+   0x000055843c897b22 <+18>:	xor    eax,eax
+   0x000055843c897b24 <+20>:	call   0x55843c8983c0 <loop>
+End of assembler dump.
+```
+
+Well, looks like our code locations are being randomized. We can confirm that PIE and ASLR are both being used in th ebinary, meaning that we need a leak of the PIE base to calculate the address of what() and jump to it. Recall that there were strstr() calls in the binary above -- let's try different format strings to see what we can leak! We know "%p" and "%lx" are out of the question...
+
+![images/term9.png](images/term9.png)
+
+Nice! We can use either %<number>p or %lx to leak a bunh of addresses.
+
+![images/term10.png](images/term10.png)
+
+I spy some 0x55555555 addresses! We can locate offsets to our code from there. 
+
+```
+gdb-peda$ p alarm_name
+$6 = {<text variable, no debug info>} 0x556b52a9b010 <alarm_name>
+```
+
+So the 6th %lx value is `0x556b52a9b4d6`, and we can subtract alarm_name to find the offset from that to alarm_name. `0x556b52a9b4d6 - 0x556b52a9b010` is equal to 1222. Running the code again shows that this offset is *constant*, no matter how many times we run the code. Let's find the offset to what by exploiting this.
+
+![images/term11.png](images/term11.png)
+
+So now we know that what()'s address can be found by taking the 6th %lx address, subtracting 1222 to get alarm_name()'s address, then adding 416 to get the address of what(). We shall turn to python scripting in the form of [Pwntools](https://github.com/Gallopsled/pwntools) to make use of these leaks.
+
+**Please view the attached [solve script for a commented use of Pwntools to solve this problem.](./solve.py)**
+
+![images/sol.png](images/sol.png)
+
+#### Flag: `flag{1ts_u4f_0_cl0ck}`
+
+-----
+
+## Why does this work?
+
+Although you did not need to know the exploit in question, you were creating a **use-after-free** attack. 
+
+	* [LiveOverflow video](https://www.youtube.com/watch?v=ZHghwsTRyzQ)
+
+When you allocate memory, say an alarm, 
