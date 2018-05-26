@@ -70,9 +70,6 @@ int main(int argc, char **argv) {
 
 ```
 
-
-
-
 Let's do some research. If our job is to exploit a bug in the program, then the bug must be triggered by something we input. Otherwise, we would have gotten the flag by just running the program! Maybe one of the functions gets() or scanf() is dangerous in some way. Let's try googling `gets c dangerous`...
 
 ![images/google1.png](images/google1.png)
