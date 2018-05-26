@@ -34,7 +34,9 @@ Worth a shot. What if the data type is bigger, say a `long`? Longs hold 64 bits 
 
 ![images/sol.png](images/sol.png)
 
-#### Flag: `flag{contained_in_margins}
+#### Flag: `flag{contained_in_margins}`
+
+------
 
 **Epilogue:** Here's proof that a higher power of two, like (2^23)^3 will still overflow to 0.
 
