@@ -8,7 +8,9 @@ We are given a binary and no source code this time! Let's try running it and tes
 
 Hmm...that "Alarm name: " looks rather suspicious at the bottom. As well, this program checks for format string attacks. Let's examine the objdump.
 
-Right away, we identify `00000000000011b0 <what>:` as our probable flag function. Also, we find that this binary was **compiled with ASLR / PIE**. Our previous binaries, like Caesar, Review, etc. all had function addresses beginning with 0x0804 and a fixed code location. Now, this strange code location signifies that our code has **ASLR, PIE, or both, randomizing libc locations and/or code locations**. We'll set that aside for now.  Let's look at something we can control, like create_alarm().
+Right away, we identify `00000000000011b0 <what>:` as our probable flag function. Also, we find that this binary was **compiled with ASLR / PIE**. Our previous binaries, like Caesar, Review, etc. all had function addresses beginning with 0x0804 and a fixed code location. Now, this strange code location signifies that our code has **ASLR, PIE, or both, randomizing libc locations and/or code locations**. We can see that function addresses instead look like `0x11b0`, signifying an *offset* froma randomized base, not absolute location.We'll set that aside for now. 
+
+Let's look at something we can control, like create_alarm().
 
 ![images/term3.png](images/term3.png)
 
@@ -64,7 +66,7 @@ Dump of assembler code for function main:
 End of assembler dump.
 ```
 
-Well, looks like our code locations are being randomized. We can confirm that PIE and ASLR are both being used in th ebinary, meaning that we need a leak of the PIE base to calculate the address of what() and jump to it. Recall that there were strstr() calls in the binary above -- let's try different format strings to see what we can leak! We know "%p" and "%lx" are out of the question...
+Well, looks like our code locations are being randomized. We can confirm that PIE and ASLR are both being used in the binary, meaning that we need a leak of the PIE base to calculate the address of what() and jump to it. Recall that there were strstr() calls in the binary above -- let's try different format strings to see what we can leak! We know "%p" and "%lx" are out of the question...
 
 ![images/term9.png](images/term9.png)
 
