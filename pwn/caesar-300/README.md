@@ -66,7 +66,9 @@ Here's proof that printf is leaking values from the stack :) We're specifically 
 
 ![images/term2.png](images/term2.png)
 
-Great! As we recall from the above articles, we can now write *anything we want* to address 0x41414141. Let's replace that with the GOT entry for a specific function...but which function? Some function has to be called after this malformed printf call to jump to give_flag, after all.
+Great! As we recall from the above articles, we can now write *anything we want* to an address we input. We also know that our input is placed on the 31th argument of the stack. If we overwrite a GOT function, then we can theoretically control where the GOT entry redirects to, and get program control!
+
+...but which function? Some function has to be called after this malformed printf call to jump to give_flag, after all.
 
 ```
 * Code from https://stackoverflow.com/a/16374718 */
@@ -101,7 +103,7 @@ We could also overwrite exit(), but the function I chose to overwrite was puts()
 
 **When printf is called with only a string as input (not a variable!), it gets optimized to puts().**
 
-In fact, this harkens back to [HSCTF 2017's Never Say Goodbye :P](https://jakobdegen.gitbooks.io/hsctf-4-writeups/content/solutions/exploitation/400-never-say-goodbye.html) We can verify this by looking at the disassembly with `objdump -d caesar`:
+In fact, this harkens back to [HSCTF 2017's Never Say Goodbye.](https://jakobdegen.gitbooks.io/hsctf-4-writeups/content/solutions/exploitation/400-never-say-goodbye.html) We can verify this by looking at the disassembly with `objdump -d caesar`:
 
 ![images/term3.png](images/term3.png)
 
@@ -111,7 +113,9 @@ We are correct! The second printf() call gets optimized to puts() when run by th
 0804a020 R_386_JUMP_SLOT   puts@GLIBC_2.0
 ```
 
-is our output. One last thing: the specificer "%<number>x" in printf will pad its input to <number> characters. For example, if we type "A%2005x", the program will take the input "A" and pad it with 2005 bytes. Now, let's begin constructing our exploit! Right now, our exploit looks like this: `\x20\xa0\x04\x08%134514794x%31$n`, where we write the value **0x8048862 (address of give_flag)** bytes to the 31st item on the stack, which is the address of puts@got.
+0x0804a020 is where puts is located. Note that this exploit will also work for exit().
+
+One last thing: the specificer "%<number>x" in printf will pad its input to <number> characters. For example, if we type "A%2005x", the program will take the input "A" and pad it with 2005 bytes. Now, let's begin constructing our exploit! Right now, our exploit looks like this: `\x20\xa0\x04\x08%134514794x%31$n`, where we write the value **0x8048862 (address of give_flag)** bytes to the 31st item on the stack, which is the address of puts@got.
 
 A problem immediately arises. We are writing over **134 million** characters to stdin! How can we cut this down? Solution: *use %hn instead of %n*. %hn writes to a half word, e.g. 0x4344 instead of 0x41424344. By doing this, we can split up our data into 0x804 and 0x8862, much more reasonable numbers. Of course, this means that we have to write directly to the 4 higher bytes of the GOT entry, since we can only write 4 bytes.
 
@@ -119,9 +123,9 @@ If a memory location 0x41414141 contains value 0x41424344, then taking the halfw
 
 Let's split up our input in this fashion. Our payload now looks like `\x22\xa0\x04\x08\x20\xa0\x04\x08%2044x%31\$hn%32870x%32\$hn`. To break this down:
 
-	1. `\x22\xa0\x04\x08\x20\xa0\x04\x08`: We place the addresses we want to write to on the stack. In this case, the higher 2 bytes of puts@GOT are at the 31st position on the stack, and the lower 2 bytes are at the 32nd position.
-	2. `%2044x%31\$hn` Note that *we have written 8 bytes already with our addresses!*. This means we have 0x0804 - 8 characters left to write, or 2044 characters. We pad these in with `%2044x`, then write this halfword to the higher 2 bytes of puts@GOT.
-	3. `%32870x%32\$hn` Our first input totaled 0x804 characters total, so we need 0x8862 - 0x0804 more characters, or 32870. We pad these, then write to the two lower bytes of puts@GOT.
+1. `\x22\xa0\x04\x08\x20\xa0\x04\x08`: We place the addresses we want to write to on the stack. In this case, the higher 2 bytes of puts@GOT are at the 31st position on the stack, and the lower 2 bytes are at the 32nd position.
+2. `%2044x%31\$hn` Note that *we have written 8 bytes already with our addresses!*. This means we have 0x0804 - 8 characters left to write, or 2044 characters. We pad these in with `%2044x`, then write this halfword to the higher 2 bytes of puts@GOT.
+3. `%32870x%32\$hn` Our first input totaled 0x804 characters total, so we need 0x8862 - 0x0804 more characters, or 32870. We pad these, then write to the two lower bytes of puts@GOT.
 
 Now, when we call puts() at the very end, we should instead redirect to give_flag! Let's test it out.
 
@@ -142,4 +146,4 @@ Whoops! We forgot to provide input for the Caesar cipher itself. Append a "\n0\n
 
 ![images/sol.png](images/sol.png)
 
-#### Flag: `flag{printered_lol}
+#### Flag: `flag{printered_lol}`

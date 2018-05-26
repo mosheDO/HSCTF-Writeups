@@ -104,13 +104,13 @@ Essentially, when you free() a pointer's memory and *don't remove your pointer p
 
 Let's take a look at the source code of alarm for an example.
 
-![src1.png](src1.png)
+![images/src1.png](images/src1.png)
 
 We can see that if an alarm_t and radio_t occupy the same location in memory, then when alarm_t is free()'d, the larger radio_t name buffer could overwrite the alarm_t ring() pointer.
 
 However, alarm_delete() calls were masked as a deterrent to the most obvious UAF attempts, like trying to ring an alarm right after deletion.
 
-![src2.png](src2.png)
+![images/src2.png](images/src2.png)
 
 Right before free()ing the block of memory, the entire block is set to 0, thus "preventing" an immediate post-deletion UAF. However, one key part is missing: **the pointer to alarm is never set to NULL**.
 

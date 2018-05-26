@@ -114,4 +114,4 @@ Means that `valid` is placed on the stack *before* `buffer` is. Returning to the
 
 Therefore, we can overwrite valid by entering more than 32 characters (in reality a bit more) for the title of the movie, which means that valid gets overwritten with a nonzero value, thus making our review "valid" and getting us the flag!
 
-[Source for stack overflow images located here! Also functions as good reading and introduction to buffer overflows.](https://en.wikipedia.org/wiki/Stack_buffer_overflow)
+[Source for images here. The article is also a good introduction to buffer overflows.](https://en.wikipedia.org/wiki/Stack_buffer_overflow)

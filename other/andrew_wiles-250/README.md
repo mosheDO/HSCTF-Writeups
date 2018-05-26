@@ -38,6 +38,6 @@ Worth a shot. What if the data type is bigger, say a `long`? Longs hold 64 bits 
 
 ------
 
-**Epilogue:** Here's proof that a higher power of two, like (2^23)^3 will still overflow to 0.
+**Epilogue:** Here's proof that a higher power of two, like (2^23)^3 = 2^69 will still overflow to 0.
 
 ![images/epi.png](images/epi.png)

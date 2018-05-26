@@ -11,31 +11,30 @@ Armed with our new knowledge about buffer overflows, let's take a look at `jumpe
 
 void lol() {
 	//get flag
-	system("/bin/cat /home/ctfadmin/HSCTF-Problems/jumper/flag" /*|        | o */);
-}						  										/*|        |/|\ look it's keith! */
-						  										/*|        |/ \ great jumper, he is*/
-						  										/*|        | */
+	system("/bin/cat /home/ctfadmin/HSCTF-Problems/jumper/flag" 
+}						  										
+
 void jumper() {	
 
-	// can overflow!!	  										/*|        | */
-	char dest[32];		  										/*|        | */
-	printf("Gimme some input: ");								/*|        | */
+	// can overflow!!
+	char dest[32];
+	printf("Gimme some input: ");
 
 	//dangerous!
-	gets(dest);			  										/*|        | */
-	printf("Jumping to %s\n", dest);							/*|        | */
-}						  										/*|        | */
-						  										/*|        | */
-int main() {													/*|        | */
-	setbuf(stdout, NULL);			  							/*|        | */
-	gid_t gid = getegid();										/*|        | */
-	setresgid(gid,gid,gid);										/*|        | */
-	jumper();			  										/*|        | */
-}						  										/*|        | */
+	gets(dest);
+	printf("Jumping to %s\n", dest);
+}
+
+int main() {
+	setbuf(stdout, NULL);
+	gid_t gid = getegid();
+	setresgid(gid,gid,gid);
+	jumper();
+}
 ```
 Indeed, we spy another gets() call. However, this time there doesn't seem to be anything to overwrite after `dest`, so what do we do from here?
 
-Let's go back to the Wikipedia diagrams. What's located below our character arrays?
+Let's go back to the Wikipedia diagram. What's located below our character array?
 
 ![images/over1.png](images/over1.png)
 
@@ -43,7 +42,7 @@ Cool! Maybe if we overwrite the return address of jumper(), we can redirect prog
 
 #### A note must be made here: most architectures store addresses in *little endian*: that is, the address `0xA1B2C3D4` is stored as `\xD4\xC3\xB2\xA1` in memory. More research is left as an exercise to the reader.
 
-However, how are we going to find the address of lol() so that we can jump to it? Here begins the use of Linux utilities **objdump** and **gdb**. At its core, `objdump` provides a raw disassembly of an ELF binary, and `gdb` allows you to debug a program by stepping through instructions. 
+However, how are we going to find the address of lol() so that we can jump to it? We can use Linux utilities like **objdump** and **gdb**. At its core, `objdump` provides a raw disassembly of an ELF binary, and `gdb` allows you to debug a program by stepping through instructions. 
 
 Let's begin by running `objdump -d jumper -M intel`. This will (-d)isassemble jumper using Intel syntax.
 
@@ -63,11 +62,11 @@ Not quite. We can see that the segfault address appears normal with no 0x41s any
 
 ![images/gdb3.png](images/gdb3.png)
 
-We're almost there! We can see a few As and the null byte C-string terminator appearing in our input. We have two extra As, so let's change our payload to 44 As and append the address `\x2b\x85\x04\x08` at the end. If all goes well, the 44 As should overwrite all other data, and the return address should be overwritten with the address of lol().
+We're almost there! We can see a few As and the null byte terminator appearing in our input. We have two extra As, so let's change our payload to 44 As and append the address `\x2b\x85\x04\x08` at the end. If all goes well, the 44 As should overwrite all other data, and the return address should be overwritten with the address of lol().
 
 ![images/gdb4.png](images/gdb4.png)
 
-Success!! We don't have a "flag" file created, but our program clearly called lol(). Let's try it through netcat by *piping* our input into nc.
+Success!! We don't have a "flag" file created, but our program clearly called lol(). Let's try it through netcat by piping our input into nc.
 
 ![images/sol.png](images/sol.png)
 
@@ -77,4 +76,6 @@ Success!! We don't have a "flag" file created, but our program clearly called lo
 
 ## Why does this work?
 
-We've performed the same exploit as [Review](../review-100/README.md), but instead of blindly overwriting a variable above our buffer, we now carefully craft and modify our payload to overwrite the *return address* of a method with a specially crafted input. This writeup also provides a primer on using objdump / gdb to create and test exploits locally.
+We've performed the same exploit as [Review](../review-100/README.md), but instead of blindly overwriting a variable above our buffer, we now carefully craft our payload to specifically overwrite the *return address* of a method. 
+
+This writeup also provides a primer on using objdump / gdb to create and test exploits locally.
