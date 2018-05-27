@@ -66,7 +66,7 @@ Dump of assembler code for function main:
 End of assembler dump.
 ```
 
-Well, looks like our code locations are being randomized. We can confirm that PIE and ASLR are both being used in the binary, meaning that we need a leak of the PIE base to calculate the address of what() and jump to it. Recall that there were strstr() calls in the binary above -- let's try different format strings to see what we can leak! We know "%p" and "%lx" are out of the question...
+Well, looks like our code locations are being randomized. We can confirm that PIE and ASLR are both being used in the binary, meaning that we need a leak of the PIE base to calculate the address of what() and jump to it. Recall that there were strstr() calls in the binary above -- let's try different format strings to see what we can leak! We know "%p" and "%x" are out of the question...
 
 ![images/term9.png](images/term9.png)
 
