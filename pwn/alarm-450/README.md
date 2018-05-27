@@ -70,7 +70,7 @@ Well, looks like our code locations are being randomized. We can confirm that PI
 
 ![images/term9.png](images/term9.png)
 
-Nice! We can use either %<number>p or %lx to leak a bunh of addresses.
+Nice! We can use either %\<number\>p or %lx to leak a bunch of addresses.
 
 ![images/term10.png](images/term10.png)
 
