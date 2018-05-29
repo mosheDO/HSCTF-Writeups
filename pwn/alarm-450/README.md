@@ -1,4 +1,4 @@
-# Alarm (Binary Exploitation, 400 points)
+# Alarm (Binary Exploitation, 450 points)
 
 We are given a binary and no source code this time! Let's try running it and testing some inputs, much like we did for [Review](../review-100/README.md).
 
