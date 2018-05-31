@@ -9,7 +9,7 @@ So we're supposed to exploit this program in some way. First, let's try netcatti
 
 ![images/nc1.png](images/nc1.png)
 
-Submitting failed? Let's open up the source code and start analyzing. Here's a sample annotation for someone who's taken a Java course like AP CS A or Intro to CS and doesn't know C:
+Submitting failed? Let's open up the source code and start analyzing. Here's a sample annotation that someone who's only taken Java *might* write:
 
 ```
 // are these import statements?
